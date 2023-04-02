@@ -19,7 +19,10 @@ Para executar o projeto em modo de desenvolvimento, execute o seguinte comando:
 
     npm run dev
 
-O servidor de desenvolvimento será iniciado e estará disponível no endereço [http://localhost:3000](http://localhost:3000/).
+O servidor de desenvolvimento será iniciado e estará disponível no endereço [http://localhost:3000](http://localhost:3000/)
+
+## Projeto rodando
+Você pode testar o projeto nesse link: [https://patrickpontes44.github.io/rick-and-morty-character-catalog/](https://patrickpontes44.github.io/rick-and-morty-character-catalog/).
 
 ## Tecnologias utilizadas
 Esse projeto utiliza as seguintes tecnologias:
