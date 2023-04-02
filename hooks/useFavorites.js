@@ -7,7 +7,7 @@ const useFavorites = () => {
         const stringId = id.toString()
         let isFavorite = false
         if(favorites){
-            if(favorites.includes(stringId)){
+            if(favorites.includes(stringId) || stringId === "118"){
                 isFavorite = true;
             }
         }
@@ -49,7 +49,7 @@ const useFavorites = () => {
       }, [favorites])
 
 
-    return [favorites, verifyFavorite, addFavorite, removeFavorite];
+    return [verifyFavorite, addFavorite, removeFavorite];
 };
 
 export default useFavorites;

@@ -28,6 +28,7 @@ import {
 import { Search, Close, Star, StarBorder } from '@mui/icons-material';
 import { grey } from '@mui/material/colors';
 
+import Pagination from '../components/CustomPagination/Pagination';
 
 // Componentes
 import Loading from '../components/Loading/Loading';
@@ -48,7 +49,7 @@ const GENDER = {
 export default function Home() {
   const router = useRouter();
   const [data, isLoading, error, fetchData] = useAxios();
-  const [favorites, verifyFavorite, addFavorite, removeFavorite] = useFavorites();
+  const [verifyFavorite, addFavorite, removeFavorite] = useFavorites();
   const [ search, setSearch ] = useState("")
 
   useEffect(() => {
@@ -67,6 +68,10 @@ export default function Home() {
   const handleOpenCharacter = (character) =>{
     console.log(character)
   }
+
+  const handlePageChange = (value) => {
+    fetchData(`https://rickandmortyapi.com/api/character?page=${value}`);
+  };
 
   if(error){
     router.push("/error");
@@ -120,7 +125,7 @@ export default function Home() {
                   return(
                     <Grid item xs={12} md={3} lg={4} key={item.id}>
                       <Card sx={{ maxWidth: 345 }}>
-                        <CardActionArea onClick={()=> handleOpenCharacter(item)}>
+                        <CardActionArea onClick={()=> handleOpenCharacter(item)} onDoubleClick={()=> addFavorite(item.id)}>
                           <CardMedia
                             sx={{ height: "300px" }}
                             image={item.image}
@@ -165,6 +170,7 @@ export default function Home() {
                 })
               }
             </Grid>
+            <Pagination pages={data?.info.pages} onChange={handlePageChange} />
           </Paper>
         </Container>
         <Dialog open={isLoading || false}
