@@ -24,7 +24,12 @@ import {
   CardMedia,
   CardActionArea,
   Grid,
+  InputLabel,
+  MenuItem,
+  FormControl,
+  Select,
 } from '@mui/material';
+
 import { Search, Close, Star, StarBorder } from '@mui/icons-material';
 import { grey } from '@mui/material/colors';
 
@@ -46,32 +51,76 @@ const GENDER = {
   "unknown": "Desconhecido",
 }
 
+const audio = new Audio('../../song/evil_morty.mp3');
+
+
 export default function Home() {
   const router = useRouter();
   const [data, isLoading, error, fetchData] = useAxios();
   const [verifyFavorite, addFavorite, removeFavorite] = useFavorites();
   const [ search, setSearch ] = useState("")
+  const [ url, setUrl ] = useState("https://rickandmortyapi.com/api/character")
 
   useEffect(() => {
-    fetchData('https://rickandmortyapi.com/api/character');
-  }, []);
+    fetchData(url);
+  }, [url]);
 
   const handleSearch = ()=>{
-    fetchData(`https://rickandmortyapi.com/api/character/?name=${search}`);
+    let URL_OBJ = new URL(url);
+
+    if(URL_OBJ.searchParams.get('name')){
+      URL_OBJ.searchParams.set("name", search)
+    }else{
+      URL_OBJ.searchParams.append("name", search)
+    }
+    const parsedURL = URL_OBJ.toString()
+    setUrl(parsedURL)
+  }
+
+  const handleFilter = (name, value)=>{
+    let URL_OBJ = new URL(url);
+
+    if(value === "all"){
+      URL_OBJ.searchParams.delete(name)
+    }else{
+      if(URL_OBJ.searchParams.get(name)){
+        URL_OBJ.searchParams.set(name, value)
+      }else{
+        URL_OBJ.searchParams.append(name, value)
+      }
+    }
+    const parsedURL = URL_OBJ.toString()
+    setUrl(parsedURL)
+
   }
 
   const handleCleanInput = ()=>{
     setSearch("")
-    fetchData('https://rickandmortyapi.com/api/character');
-  }
-
-  const handleOpenCharacter = (character) =>{
-    console.log(character)
+    let URL_OBJ = new URL(url);
+    URL_OBJ.searchParams.delete("name")
+    const parsedURL = URL_OBJ.toString()
+    setUrl(parsedURL)
   }
 
   const handlePageChange = (value) => {
-    fetchData(`https://rickandmortyapi.com/api/character?page=${value}`);
+    setUrl(`https://rickandmortyapi.com/api/character?page=${value}`)
   };
+
+  const handleOpenCharacter = (id) =>{
+    new Audio().pause()
+    if(id == 118){
+      if(!audio.paused){
+        audio.pause();
+        audio.currentTime = 0;
+      }
+      audio.play();
+    }else{
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    router.push(`/personagem/${id}`)
+  }
+
 
   if(error){
     router.push("/error");
@@ -102,21 +151,59 @@ export default function Home() {
           }}>
             <Stack gap={4}>
               <Typography variant='h4' sx={{ textAlign: 'center', m: 0 }}>Pesquise um persongem</Typography>
-              <TextField label="Pesquisar personagem" variant="outlined" color='secondary'
-              value={search}
-              onChange={(evt)=> setSearch(evt.target.value)}
-              onKeyDown={(evt)=>{
-                if(evt.key === 'Enter'){
-                  handleSearch()
-                }
-              }}
-              InputProps={{
-                endAdornment: <Stack direction="row">
-                  <IconButton onClick={handleSearch}><Search /></IconButton>
-                  <IconButton onClick={handleCleanInput}><Close /></IconButton>
-                </Stack>
-              }}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={12} lg={6}>
+                  <TextField label="Pesquisar personagem" variant="outlined" color='secondary'
+                  fullWidth
+                  value={search}
+                  onChange={(evt)=> setSearch(evt.target.value)}
+                  onKeyDown={(evt)=>{
+                    if(evt.key === 'Enter'){
+                      handleSearch()
+                    }
+                  }}
+                  InputProps={{
+                    endAdornment: <Stack direction="row">
+                      <IconButton onClick={handleSearch}><Search /></IconButton>
+                      <IconButton onClick={handleCleanInput}><Close /></IconButton>
+                    </Stack>
+                  }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={12} lg={3}>
+                  <FormControl fullWidth>
+                    <InputLabel id="status-label">Status</InputLabel>
+                    <Select
+                      labelId="status-label"
+                      label="Status"
+                      defaultValue="all"
+                      onChange={(evt)=> handleFilter("status", evt.target.value)}
+                    >
+                      <MenuItem value="all">Todos</MenuItem>
+                      <MenuItem value="alive">Vivo</MenuItem>
+                      <MenuItem value="dead">Morto</MenuItem>
+                      <MenuItem value="unknown">Desconhecido</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={12} lg={3}>
+                  <FormControl fullWidth>
+                    <InputLabel id="gender-label">Gênero</InputLabel>
+                    <Select
+                      labelId="gender-label"
+                      label="Gênero"
+                      defaultValue="all"
+                      onChange={(evt)=> handleFilter("gender", evt.target.value)}
+                    >
+                      <MenuItem value="all">Todos</MenuItem>
+                      <MenuItem value="male">Masculino</MenuItem>
+                      <MenuItem value="female">Feminino</MenuItem>
+                      <MenuItem value="genderless">Sem gênero</MenuItem>
+                      <MenuItem value="unknown">Desconhecido</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
             </Stack>
 
             <Grid container spacing={2}>
@@ -125,7 +212,7 @@ export default function Home() {
                   return(
                     <Grid item xs={12} md={3} lg={4} key={item.id}>
                       <Card sx={{ maxWidth: 345 }}>
-                        <CardActionArea onClick={()=> handleOpenCharacter(item)} onDoubleClick={()=> addFavorite(item.id)}>
+                        <CardActionArea onClick={()=> handleOpenCharacter(item.id)} onDoubleClick={()=> addFavorite(item.id)}>
                           <CardMedia
                             sx={{ height: "300px" }}
                             image={item.image}
@@ -135,17 +222,13 @@ export default function Home() {
                             <Typography gutterBottom variant="h6" component="div">
                               {item.id} - {item.name}
                             </Typography>
-                            <Stack direction="row">
+                            <Stack direction="row" columnGap={2} flexWrap="wrap" justifyContent="flex-start" alignItems="flex-start">
                               <Typography variant="subtitle2" color="text.secondary">
                                 {`Espécie: ${item.species}`}
                               </Typography>
-                            </Stack>
-                            <Stack direction="row">
                               <Typography variant="subtitle2" color="text.secondary">
                                 {`Gênero: ${GENDER[item.gender]}`}
                               </Typography>
-                            </Stack>
-                            <Stack direction="row">
                               <Typography variant="subtitle2" color="text.secondary">
                                 {`Status: ${STATUS[item.status]}`}
                               </Typography>
