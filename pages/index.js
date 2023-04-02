@@ -5,6 +5,8 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import useAxios from '../hooks/useAxios';
 import { useRouter } from 'next/router';
+import useFavorites from '../hooks/useFavorites';
+
 
 // Material UI
 import {
@@ -23,7 +25,7 @@ import {
   CardActionArea,
   Grid,
 } from '@mui/material';
-import { Search, Close } from '@mui/icons-material';
+import { Search, Close, Star, StarBorder } from '@mui/icons-material';
 import { grey } from '@mui/material/colors';
 
 
@@ -46,7 +48,7 @@ const GENDER = {
 export default function Home() {
   const router = useRouter();
   const [data, isLoading, error, fetchData] = useAxios();
-  
+  const [favorites, verifyFavorite, addFavorite, removeFavorite] = useFavorites();
   const [ search, setSearch ] = useState("")
 
   useEffect(() => {
@@ -65,7 +67,6 @@ export default function Home() {
   const handleOpenCharacter = (character) =>{
     console.log(character)
   }
-
 
   if(error){
     router.push("/error");
@@ -117,16 +118,16 @@ export default function Home() {
               {
                 data && data.results.map((item)=> {
                   return(
-                    <Grid item xs={12} md={3} lg={4}>
+                    <Grid item xs={12} md={3} lg={4} key={item.id}>
                       <Card sx={{ maxWidth: 345 }}>
                         <CardActionArea onClick={()=> handleOpenCharacter(item)}>
                           <CardMedia
-                            sx={{ aspectRatio: '1/1' }}
+                            sx={{ height: "300px" }}
                             image={item.image}
                             title={item.name}
                           />
                           <CardContent>
-                            <Typography gutterBottom variant="h5" component="div">
+                            <Typography gutterBottom variant="h6" component="div">
                               {item.id} - {item.name}
                             </Typography>
                             <Stack direction="row">
@@ -147,8 +148,16 @@ export default function Home() {
                           </CardContent>
                         </CardActionArea>
                         <CardActions>
-                          <Button size="small">Share</Button>
-                          <Button size="small">Learn More</Button>
+                          {
+                            verifyFavorite(item.id) ?
+                            <IconButton size='large' onClick={()=> removeFavorite(item.id)}>
+                              <Star color='warning' />
+                            </IconButton>
+                            :
+                            <IconButton size='large' onClick={()=> addFavorite(item.id)}>
+                              <StarBorder />
+                            </IconButton>
+                          }
                         </CardActions>
                       </Card>
                     </Grid>
