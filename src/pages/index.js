@@ -51,9 +51,6 @@ const GENDER = {
   "unknown": "Desconhecido",
 }
 
-const audio = new Audio('../../song/evil_morty.mp3');
-
-
 export default function Home() {
   const router = useRouter();
   const [data, isLoading, error, fetchData] = useAxios();
@@ -107,17 +104,6 @@ export default function Home() {
   };
 
   const handleOpenCharacter = (id) =>{
-    new Audio().pause()
-    if(id == 118){
-      if(!audio.paused){
-        audio.pause();
-        audio.currentTime = 0;
-      }
-      audio.play();
-    }else{
-      audio.pause();
-      audio.currentTime = 0;
-    }
     router.push(`/personagem/${id}`)
   }
 
